@@ -1,0 +1,28 @@
+# Android
+*.iml
+.gradle
+/android/local.properties
+/android/.idea
+/android/build
+/android/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Backend
+/backend/node_modules
+/backend/dist
+/backend/.env
+/backend/coverage
+/backend/.nyc_output
+/backend/*.log
+
+# IDE
+.idea/
+*.iml
+*.iws
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
