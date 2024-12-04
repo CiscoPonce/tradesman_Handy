@@ -1,5 +1,6 @@
 package com.tradesmanhandy.app.presentation.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tradesmanhandy.app.data.model.Booking
@@ -10,12 +11,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val bookingRepository: IBookingRepository
 ) : ViewModel() {
+
+    companion object {
+        private const val TAG = "HomeViewModel"
+    }
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState
@@ -29,39 +36,75 @@ class HomeViewModel @Inject constructor(
 
     fun loadBookings() {
         viewModelScope.launch {
-            _uiState.value = HomeUiState.Loading
-            bookingRepository.getTradesmanBookings(tradesmanId)
-                .catch { error ->
-                    _uiState.value = HomeUiState.Error(error.message ?: "Unknown error occurred")
-                }
-                .collect { bookings ->
-                    _uiState.value = HomeUiState.Success(
-                        bookings = bookings,
-                        stats = calculateBookingStats(bookings)
-                    )
-                }
+            try {
+                Log.d(TAG, "Loading bookings for tradesman: $tradesmanId")
+                _uiState.value = HomeUiState.Loading
+                
+                bookingRepository.getTradesmanBookings(tradesmanId)
+                    .catch { error ->
+                        Log.e(TAG, "Error loading bookings", error)
+                        when (error) {
+                            is HttpException -> {
+                                val errorBody = error.response()?.errorBody()?.string()
+                                Log.e(TAG, "HTTP Error ${error.code()}: $errorBody")
+                                _uiState.value = HomeUiState.Error(
+                                    "Server error (${error.code()}): ${error.message()}"
+                                )
+                            }
+                            is IOException -> {
+                                Log.e(TAG, "Network error: ${error.message}")
+                                _uiState.value = HomeUiState.Error(
+                                    "Network error: Please check your internet connection"
+                                )
+                            }
+                            else -> {
+                                Log.e(TAG, "Unexpected error: ${error.message}")
+                                _uiState.value = HomeUiState.Error(
+                                    error.message ?: "An unexpected error occurred"
+                                )
+                            }
+                        }
+                    }
+                    .collect { bookings ->
+                        Log.d(TAG, "Successfully loaded ${bookings.size} bookings")
+                        _uiState.value = HomeUiState.Success(
+                            bookings = bookings,
+                            stats = calculateBookingStats(bookings)
+                        )
+                    }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in loadBookings", e)
+                _uiState.value = HomeUiState.Error(
+                    "An unexpected error occurred: ${e.message}"
+                )
+            }
         }
     }
 
     private fun calculateBookingStats(bookings: List<Booking>): BookingStats {
-        return BookingStats(
-            pending = bookings.count { it.status == BookingStatus.PENDING },
-            confirmed = bookings.count { 
-                it.status == BookingStatus.ACCEPTED || 
-                it.status == BookingStatus.IN_PROGRESS 
-            },
-            completed = bookings.count { it.status == BookingStatus.COMPLETED }
-        )
+        return try {
+            BookingStats(
+                pending = bookings.count { it.status == BookingStatus.PENDING },
+                confirmed = bookings.count { 
+                    it.status == BookingStatus.ACCEPTED || 
+                    it.status == BookingStatus.IN_PROGRESS 
+                },
+                completed = bookings.count { it.status == BookingStatus.COMPLETED }
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error calculating booking stats", e)
+            BookingStats(pending = 0, confirmed = 0, completed = 0)
+        }
     }
 }
 
-sealed interface HomeUiState {
-    data object Loading : HomeUiState
-    data class Error(val message: String) : HomeUiState
+sealed class HomeUiState {
+    object Loading : HomeUiState()
     data class Success(
         val bookings: List<Booking>,
         val stats: BookingStats
-    ) : HomeUiState
+    ) : HomeUiState()
+    data class Error(val message: String) : HomeUiState()
 }
 
 data class BookingStats(

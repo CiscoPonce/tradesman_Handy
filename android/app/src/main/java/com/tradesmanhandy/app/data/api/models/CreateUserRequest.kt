@@ -1,26 +1,24 @@
-package com.tradesmanhandy.app.data.model
+package com.tradesmanhandy.app.data.api.models
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class User(
-    val id: String,
+data class CreateUserRequest(
+    @Json(name = "email")
     val email: String,
+    @Json(name = "password")
+    val password: String,
     @Json(name = "firstName")
     val firstName: String,
     @Json(name = "lastName")
     val lastName: String,
-    @Json(name = "role")
-    val role: String,
     @Json(name = "phoneNumber")
     val phoneNumber: String,
+    @Json(name = "role")
+    val role: String,
     @Json(name = "companyName")
-    val companyName: String?,
+    val companyName: String? = null,
     @Json(name = "services")
-    val services: List<String>?,
-    @Json(name = "createdAt")
-    val createdAt: String,
-    @Json(name = "updatedAt")
-    val updatedAt: String
+    val services: List<String>? = null
 )

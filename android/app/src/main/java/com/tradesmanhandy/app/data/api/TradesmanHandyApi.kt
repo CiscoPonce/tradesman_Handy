@@ -2,6 +2,9 @@ package com.tradesmanhandy.app.data.api
 
 import com.tradesmanhandy.app.data.model.Booking
 import com.tradesmanhandy.app.data.model.User
+import com.tradesmanhandy.app.data.api.models.CreateUserRequest
+import com.tradesmanhandy.app.data.api.models.CreateBookingRequest
+import com.tradesmanhandy.app.data.api.models.SubmitQuoteRequest
 import retrofit2.http.*
 
 interface TradesmanHandyApi {
@@ -28,37 +31,4 @@ interface TradesmanHandyApi {
 
     @PUT("bookings/{id}/reject")
     suspend fun rejectBooking(@Path("id") bookingId: String): Booking
-
-    @PUT("bookings/{id}/schedule")
-    suspend fun scheduleBooking(
-        @Path("id") bookingId: String,
-        @Body request: ScheduleBookingRequest
-    ): Booking
 }
-
-data class CreateUserRequest(
-    val email: String,
-    val firstName: String,
-    val lastName: String,
-    val password: String,
-    val isTradesmen: Boolean,
-    val phoneNumber: String,
-    val address: String?
-)
-
-data class CreateBookingRequest(
-    val title: String,
-    val description: String,
-    val source: String,
-    val tradesmanId: String,
-    val clientId: String,
-    val location: String?
-)
-
-data class SubmitQuoteRequest(
-    val price: Double
-)
-
-data class ScheduleBookingRequest(
-    val scheduledDate: String
-)

@@ -1,0 +1,6 @@
+@echo off
+cd %~dp0
+echo Cleaning project...
+call gradlew clean
+echo Building project...
+call gradlew build --stacktrace

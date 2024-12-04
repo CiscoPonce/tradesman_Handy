@@ -18,7 +18,7 @@ data class Booking(
     val clientId: String,
     @Json(name = "tradesmanId")
     val tradesmanId: String,
-    val location: String?,
+    val location: String,
     @Json(name = "housingAssociationRef")
     val housingAssociationRef: String?,
     @Json(name = "createdAt")

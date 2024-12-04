@@ -12,10 +12,12 @@ interface IBookingRepository {
         source: String,
         tradesmanId: String,
         clientId: String,
-        location: String?
+        location: String,
+        serviceType: String = source,
+        preferredDate: String = ""
     ): Booking
 
-    suspend fun submitQuote(bookingId: String, price: Double): Booking
+    suspend fun submitQuote(bookingId: String, amount: Double): Booking
 
     suspend fun acceptBooking(bookingId: String): Booking
 

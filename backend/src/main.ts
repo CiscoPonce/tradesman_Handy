@@ -4,13 +4,19 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+  });
+
+  // Set global prefix for all routes
+  app.setGlobalPrefix('api/v1');
 
   // Enable CORS
   app.enableCors({
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: '*',
+    credentials: true,
   });
 
   // Global validation pipe
@@ -26,15 +32,16 @@ async function bootstrap() {
     .setVersion('1.0')
     .addBearerAuth()
     .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
 
-  // Get port from environment variable or use default
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+
   const port = process.env.PORT || 3000;
+  const host = '0.0.0.0'; // Listen on all network interfaces
   
-  await app.listen(port, '0.0.0.0', () => {
-    console.log(`Server running on port ${port}`);
-    console.log(`Swagger documentation available at http://localhost:${port}/api`);
-  });
+  await app.listen(port, host);
+  console.log(`Application is running on: http://${host}:${port}`);
+  console.log(`Swagger documentation available at: http://${host}:${port}/api/docs`);
 }
+
 bootstrap();
