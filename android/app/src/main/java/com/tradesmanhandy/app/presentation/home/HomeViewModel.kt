@@ -28,7 +28,7 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState
 
     // TODO: Get from auth
-    private val tradesmanId = "85c629b1-d581-4af4-998a-af09e45e9fb9"
+    private val tradesmanId = "2b6fe808-b73b-4d16-915b-298b4d076c47" // Test tradesman ID
 
     init {
         loadBookings()
@@ -46,10 +46,24 @@ class HomeViewModel @Inject constructor(
                         when (error) {
                             is HttpException -> {
                                 val errorBody = error.response()?.errorBody()?.string()
+                                val requestUrl = error.response()?.raw()?.request?.url
                                 Log.e(TAG, "HTTP Error ${error.code()}: $errorBody")
-                                _uiState.value = HomeUiState.Error(
-                                    "Server error (${error.code()}): ${error.message()}"
-                                )
+                                Log.e(TAG, "Request URL: $requestUrl")
+                                // If tradesman not found, show empty state instead of error
+                                if (error.code() == 404) {
+                                    _uiState.value = HomeUiState.Success(
+                                        bookings = emptyList(),
+                                        stats = BookingStats(
+                                            pending = 0,
+                                            confirmed = 0,
+                                            completed = 0
+                                        )
+                                    )
+                                } else {
+                                    _uiState.value = HomeUiState.Error(
+                                        "Server error (${error.code()}): ${error.message()}"
+                                    )
+                                }
                             }
                             is IOException -> {
                                 Log.e(TAG, "Network error: ${error.message}")
@@ -67,6 +81,9 @@ class HomeViewModel @Inject constructor(
                     }
                     .collect { bookings ->
                         Log.d(TAG, "Successfully loaded ${bookings.size} bookings")
+                        bookings.forEach { booking ->
+                            Log.d(TAG, "Booking: ${booking.id} - ${booking.title} - Status: ${booking.status}")
+                        }
                         _uiState.value = HomeUiState.Success(
                             bookings = bookings,
                             stats = calculateBookingStats(bookings)
@@ -83,13 +100,19 @@ class HomeViewModel @Inject constructor(
 
     private fun calculateBookingStats(bookings: List<Booking>): BookingStats {
         return try {
+            val pendingCount = bookings.count { it.status == BookingStatus.PENDING }
+            val confirmedCount = bookings.count { 
+                it.status == BookingStatus.ACCEPTED || 
+                it.status == BookingStatus.IN_PROGRESS 
+            }
+            val completedCount = bookings.count { it.status == BookingStatus.COMPLETED }
+            
+            Log.d(TAG, "Booking stats - Pending: $pendingCount, Confirmed: $confirmedCount, Completed: $completedCount")
+            
             BookingStats(
-                pending = bookings.count { it.status == BookingStatus.PENDING },
-                confirmed = bookings.count { 
-                    it.status == BookingStatus.ACCEPTED || 
-                    it.status == BookingStatus.IN_PROGRESS 
-                },
-                completed = bookings.count { it.status == BookingStatus.COMPLETED }
+                pending = pendingCount,
+                confirmed = confirmedCount,
+                completed = completedCount
             )
         } catch (e: Exception) {
             Log.e(TAG, "Error calculating booking stats", e)

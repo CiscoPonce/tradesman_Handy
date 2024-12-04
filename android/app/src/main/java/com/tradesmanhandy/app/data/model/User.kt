@@ -12,7 +12,7 @@ data class User(
     @Json(name = "lastName")
     val lastName: String,
     @Json(name = "role")
-    val role: String,
+    val role: UserRole?,
     @Json(name = "phoneNumber")
     val phoneNumber: String,
     @Json(name = "companyName")
@@ -24,3 +24,12 @@ data class User(
     @Json(name = "updatedAt")
     val updatedAt: String
 )
+
+enum class UserRole {
+    @Json(name = "client")
+    CLIENT,
+    @Json(name = "tradesman")
+    TRADESMAN,
+    @Json(name = "admin")
+    ADMIN
+}

@@ -1,6 +1,7 @@
 package com.tradesmanhandy.app.presentation.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,13 +21,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.tradesmanhandy.app.data.model.Booking
-import com.tradesmanhandy.app.data.model.BookingStatus
 import com.tradesmanhandy.app.presentation.theme.Yellow
-import com.tradesmanhandy.app.presentation.theme.LightGray
 import com.tradesmanhandy.app.presentation.theme.White
 import com.tradesmanhandy.app.util.DateFormatter
 
@@ -72,7 +70,7 @@ fun HomeScreen(
                             onClick = { viewModel.loadBookings() },
                             colors = ButtonDefaults.buttonColors(containerColor = Yellow)
                         ) {
-                            Text("Retry")
+                            Text(text = "Retry")
                         }
                     }
                 }
@@ -90,7 +88,7 @@ fun HomeScreen(
                     BookingsSection(
                         title = "Your Bookings",
                         stats = successState.stats,
-                        onViewAll = { /* TODO: Navigate to bookings list */ }
+                        onViewAll = { /* TODO: Navigate to all bookings */ }
                     )
                 }
             }
@@ -226,26 +224,33 @@ fun BookingsSection(
 fun StatsCard(
     label: String,
     value: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
+    val cardModifier = if (onClick != null) {
+        modifier.clickable(onClick = onClick)
+    } else {
+        modifier
+    }
+    
     Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = LightGray)
+        modifier = cardModifier,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }

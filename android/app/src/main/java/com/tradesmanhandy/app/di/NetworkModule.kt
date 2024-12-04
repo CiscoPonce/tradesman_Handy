@@ -5,6 +5,7 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tradesmanhandy.app.data.api.TradesmanHandyApi
 import com.tradesmanhandy.app.data.repository.BookingRepository
 import com.tradesmanhandy.app.domain.repository.IBookingRepository
+import com.tradesmanhandy.app.data.api.adapter.EnumJsonAdapter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,8 +38,10 @@ object NetworkModule {
     @Singleton
     fun provideMoshi(): Moshi {
         return Moshi.Builder()
+            .add(EnumJsonAdapter.FACTORY)
             .add(KotlinJsonAdapterFactory())
             .build()
+            .also { Log.d(TAG, "Created Moshi instance with custom enum adapters") }
     }
 
     private fun createLoggingInterceptor(): HttpLoggingInterceptor {
@@ -115,6 +118,7 @@ object NetworkModule {
             .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
             .build()
+            .also { Log.d(TAG, "Created OkHttpClient instance with ${TIMEOUT_SECONDS}s timeout") }
     }
 
     @Provides
