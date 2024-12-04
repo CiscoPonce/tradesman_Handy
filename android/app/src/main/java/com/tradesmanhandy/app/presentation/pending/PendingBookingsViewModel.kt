@@ -5,52 +5,45 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tradesmanhandy.app.data.model.Booking
 import com.tradesmanhandy.app.data.model.BookingStatus
-import com.tradesmanhandy.app.domain.repository.IBookingRepository
+import com.tradesmanhandy.app.data.repository.BookingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 private const val TAG = "PendingBookingsViewModel"
 
+sealed class PendingBookingsState {
+    object Loading : PendingBookingsState()
+    data class Success(val bookings: List<Booking>) : PendingBookingsState()
+    data class Error(val message: String) : PendingBookingsState()
+}
+
 @HiltViewModel
 class PendingBookingsViewModel @Inject constructor(
-    private val bookingRepository: IBookingRepository
+    private val repository: BookingRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<PendingBookingsUiState>(PendingBookingsUiState.Loading)
-    val uiState: StateFlow<PendingBookingsUiState> = _uiState
+    private val _state = MutableStateFlow<PendingBookingsState>(PendingBookingsState.Loading)
+    val state: StateFlow<PendingBookingsState> = _state.asStateFlow()
 
     init {
         loadPendingBookings()
     }
 
-    fun loadPendingBookings() {
+    private fun loadPendingBookings() {
         viewModelScope.launch {
-            _uiState.value = PendingBookingsUiState.Loading
-            bookingRepository.getTradesmanBookings("2b6fe808-b73b-4d16-915b-298b4d076c47")
-                .map { bookings -> 
-                    bookings.filter { it.status == BookingStatus.PENDING }
-                }
-                .catch { e ->
-                    Log.e(TAG, "Error loading pending bookings", e)
-                    _uiState.value = PendingBookingsUiState.Error(
-                        e.message ?: "Failed to load pending bookings"
-                    )
-                }
-                .collect { pendingBookings ->
-                    Log.d(TAG, "Loaded ${pendingBookings.size} pending bookings")
-                    _uiState.value = PendingBookingsUiState.Success(pendingBookings)
-                }
+            try {
+                val response = repository.getTradesmanBookings("2b6fe808-b73b-4d16-915b-298b4d076c47").first()
+                val pendingBookings = response.filter { booking -> booking.status == BookingStatus.PENDING }
+                _state.value = PendingBookingsState.Success(pendingBookings)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading pending bookings", e)
+                _state.value = PendingBookingsState.Error(e.message ?: "Unknown error occurred")
+            }
         }
     }
-}
-
-sealed class PendingBookingsUiState {
-    object Loading : PendingBookingsUiState()
-    data class Error(val message: String) : PendingBookingsUiState()
-    data class Success(val bookings: List<Booking>) : PendingBookingsUiState()
 }

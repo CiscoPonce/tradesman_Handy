@@ -19,14 +19,10 @@ fun Navigation(navController: NavHostController) {
         startDestination = Screen.Home.route
     ) {
         composable(Screen.Home.route) {
-            HomeScreen()
+            HomeScreen(navController = navController)
         }
         composable(Screen.PendingBookings.route) {
-            PendingBookingsScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
-            )
+            PendingBookingsScreen(navController = navController)
         }
     }
 }
