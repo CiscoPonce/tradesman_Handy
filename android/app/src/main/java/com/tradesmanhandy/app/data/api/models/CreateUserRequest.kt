@@ -16,9 +16,11 @@ data class CreateUserRequest(
     @Json(name = "phoneNumber")
     val phoneNumber: String,
     @Json(name = "role")
-    val role: String,
+    val role: String = "client", // Default role is client
     @Json(name = "companyName")
     val companyName: String? = null,
     @Json(name = "services")
-    val services: List<String>? = null
+    val services: List<String>? = null,
+    @Json(name = "isTradesmen")
+    val isTradesmen: Boolean = false
 )

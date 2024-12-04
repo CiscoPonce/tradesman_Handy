@@ -20,6 +20,10 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.io.IOException
 import okhttp3.Interceptor
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import okio.Buffer
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -39,7 +43,12 @@ object NetworkModule {
 
     private fun createLoggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor { message ->
-            Log.d(TAG, "OkHttp: $message")
+            // Enhanced logging for request bodies
+            if (message.startsWith("{") || message.startsWith("[")) {
+                Log.d(TAG, "Request/Response Body: $message")
+            } else {
+                Log.d(TAG, "OkHttp: $message")
+            }
         }.apply {
             level = HttpLoggingInterceptor.Level.BODY
             redactHeader("Authorization")
@@ -49,9 +58,20 @@ object NetworkModule {
 
     private fun createNetworkInterceptor(): Interceptor {
         return Interceptor { chain ->
-            val request = chain.request()
-            Log.d(TAG, "Making request: ${request.method} ${request.url}")
-            
+            val original = chain.request()
+            val request = original.newBuilder().apply {
+                header("Content-Type", "application/json")
+                method(original.method, original.body)
+            }.build()
+
+            // Log the complete request body
+            request.body?.let { requestBody ->
+                val buffer = Buffer()
+                requestBody.writeTo(buffer)
+                val bodyStr = buffer.readUtf8()
+                Log.d(TAG, "Complete Request Body: $bodyStr")
+            }
+
             try {
                 val response = chain.proceed(request)
                 Log.d(TAG, "Received response: ${response.code} for ${request.url}")
@@ -65,15 +85,21 @@ object NetworkModule {
                     Log.e(TAG, "Request headers: ${request.headers}")
                 }
                 response
-            } catch (e: SocketTimeoutException) {
-                Log.e(TAG, "Timeout error for ${request.url}", e)
-                throw IOException("Network timeout. The server might be starting up, please try again in a minute.", e)
-            } catch (e: UnknownHostException) {
-                Log.e(TAG, "Unknown host error for ${request.url}", e)
-                throw IOException("Unable to reach server. Please check your internet connection.", e)
             } catch (e: Exception) {
-                Log.e(TAG, "Network error for ${request.url}", e)
-                throw e
+                when (e) {
+                    is SocketTimeoutException -> {
+                        Log.e(TAG, "Network timeout error", e)
+                        throw IOException("Network timeout. Please check your connection and try again.")
+                    }
+                    is UnknownHostException -> {
+                        Log.e(TAG, "Network host not found", e)
+                        throw IOException("Network error. Please check your connection and try again.")
+                    }
+                    else -> {
+                        Log.e(TAG, "Network error", e)
+                        throw e
+                    }
+                }
             }
         }
     }

@@ -4,6 +4,7 @@ import com.tradesmanhandy.app.data.api.TradesmanHandyApi
 import com.tradesmanhandy.app.data.api.models.CreateUserRequest
 import com.tradesmanhandy.app.data.model.User
 import javax.inject.Inject
+import android.util.Log
 
 class UserRepository @Inject constructor(
     private val api: TradesmanHandyApi
@@ -14,22 +15,24 @@ class UserRepository @Inject constructor(
         firstName: String,
         lastName: String,
         phoneNumber: String,
-        role: String = "client", // Default role is client
+        role: String = "client",
         companyName: String? = null,
         services: List<String>? = null
     ): User {
-        return api.createUser(
-            CreateUserRequest(
-                email = email,
-                password = password,
-                firstName = firstName,
-                lastName = lastName,
-                phoneNumber = phoneNumber,
-                role = role,
-                companyName = companyName,
-                services = services
-            )
+        Log.d("UserRepository", "Creating user with role: $role")
+        val request = CreateUserRequest(
+            email = email,
+            password = password,
+            firstName = firstName,
+            lastName = lastName,
+            phoneNumber = phoneNumber,
+            role = role,
+            companyName = companyName,
+            services = services,
+            isTradesmen = role == "tradesman"
         )
+        Log.d("UserRepository", "Request body: $request")
+        return api.createUser(request)
     }
 
     suspend fun getUser(id: String): User {
