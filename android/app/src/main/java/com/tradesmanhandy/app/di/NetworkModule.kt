@@ -20,6 +20,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
+    private const val BASE_URL = "https://tradesman-handy-api.onrender.com/"
+
     @Provides
     @Singleton
     fun provideMoshi(): Moshi {
@@ -44,7 +46,11 @@ object NetworkModule {
                 println("Making request: ${request.method} ${request.url}")
                 
                 try {
-                    chain.proceed(request)
+                    val response = chain.proceed(request)
+                    if (!response.isSuccessful) {
+                        println("Error response: ${response.code} - ${response.message}")
+                    }
+                    response
                 } catch (e: Exception) {
                     println("Network error: ${e.message}")
                     throw e
@@ -60,7 +66,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient, moshi: Moshi): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://tradesman-handy-api.onrender.com/") // Render deployment URL
+            .baseUrl(BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
