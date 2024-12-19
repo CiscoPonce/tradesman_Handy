@@ -116,11 +116,15 @@ export class BookingsService {
           'client.firstName',
           'client.lastName',
           'client.phoneNumber',
+          'client.createdAt',
+          'client.updatedAt',
           'tradesman.id',
           'tradesman.email',
           'tradesman.firstName',
           'tradesman.lastName',
           'tradesman.phoneNumber',
+          'tradesman.createdAt',
+          'tradesman.updatedAt',
         ])
         .getMany();
 
@@ -144,6 +148,8 @@ export class BookingsService {
           'client.firstName',
           'client.lastName',
           'client.phoneNumber',
+          'client.createdAt',
+          'client.updatedAt',
         ])
         .orderBy('booking.scheduledDate', 'ASC')
         .addOrderBy('booking.createdAt', 'DESC')
@@ -170,11 +176,15 @@ export class BookingsService {
           'client.firstName',
           'client.lastName',
           'client.phoneNumber',
+          'client.createdAt',
+          'client.updatedAt',
           'tradesman.id',
           'tradesman.email',
           'tradesman.firstName',
           'tradesman.lastName',
           'tradesman.phoneNumber',
+          'tradesman.createdAt',
+          'tradesman.updatedAt',
         ])
         .getMany();
 
@@ -205,11 +215,15 @@ export class BookingsService {
           'client.firstName',
           'client.lastName',
           'client.phoneNumber',
+          'client.createdAt',
+          'client.updatedAt',
           'tradesman.id',
           'tradesman.email',
           'tradesman.firstName',
           'tradesman.lastName',
           'tradesman.phoneNumber',
+          'tradesman.createdAt',
+          'tradesman.updatedAt',
         ])
         .getOne();
 
@@ -249,11 +263,15 @@ export class BookingsService {
           'client.firstName',
           'client.lastName',
           'client.phoneNumber',
+          'client.createdAt',
+          'client.updatedAt',
           'tradesman.id',
           'tradesman.email',
           'tradesman.firstName',
           'tradesman.lastName',
           'tradesman.phoneNumber',
+          'tradesman.createdAt',
+          'tradesman.updatedAt',
         ])
         .getOne();
 
@@ -290,11 +308,15 @@ export class BookingsService {
           'client.firstName',
           'client.lastName',
           'client.phoneNumber',
+          'client.createdAt',
+          'client.updatedAt',
           'tradesman.id',
           'tradesman.email',
           'tradesman.firstName',
           'tradesman.lastName',
           'tradesman.phoneNumber',
+          'tradesman.createdAt',
+          'tradesman.updatedAt',
         ])
         .getOne();
 
@@ -328,11 +350,15 @@ export class BookingsService {
           'client.firstName',
           'client.lastName',
           'client.phoneNumber',
+          'client.createdAt',
+          'client.updatedAt',
           'tradesman.id',
           'tradesman.email',
           'tradesman.firstName',
           'tradesman.lastName',
           'tradesman.phoneNumber',
+          'tradesman.createdAt',
+          'tradesman.updatedAt',
         ])
         .getOne();
 
