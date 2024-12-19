@@ -55,7 +55,7 @@ export const generatePendingBookings = (): CreateBookingDto[] => {
     clientId: CLIENT_ID,
     tradesmanId: TRADESMAN_ID,
     source: BookingSource.LOCAL,
-    preferredDate: generateRandomDate(new Date(), new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
+    preferredDate: generateRandomDate(new Date(), new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)).toISOString(),
     quotedPrice: null,
     scheduledDate: null
   }));
@@ -71,9 +71,9 @@ export const generateAcceptedBookings = (): CreateBookingDto[] => {
       clientId: CLIENT_ID,
       tradesmanId: TRADESMAN_ID,
       source: BookingSource.LOCAL,
-      preferredDate,
+      preferredDate: preferredDate.toISOString(),
       quotedPrice: Math.floor(Math.random() * 500) + 100, // Random price between 100 and 600
-      scheduledDate: new Date(preferredDate.getTime() + Math.random() * 24 * 60 * 60 * 1000) // Schedule within 24 hours of preferred date
+      scheduledDate: new Date(preferredDate.getTime() + Math.random() * 24 * 60 * 60 * 1000).toISOString() // Schedule within 24 hours of preferred date
     };
   });
 };
@@ -88,9 +88,9 @@ export const generateCompletedBookings = (): CreateBookingDto[] => {
       clientId: CLIENT_ID,
       tradesmanId: TRADESMAN_ID,
       source: BookingSource.LOCAL,
-      preferredDate,
+      preferredDate: preferredDate.toISOString(),
       quotedPrice: Math.floor(Math.random() * 500) + 100, // Random price between 100 and 600
-      scheduledDate: new Date(preferredDate.getTime() + Math.random() * 24 * 60 * 60 * 1000) // Schedule within 24 hours of preferred date
+      scheduledDate: new Date(preferredDate.getTime() + Math.random() * 24 * 60 * 60 * 1000).toISOString() // Schedule within 24 hours of preferred date
     };
   });
 };
