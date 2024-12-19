@@ -60,18 +60,18 @@ export class BookingsService {
 
   async findAllForTradesman(tradesmanId: string): Promise<Booking[]> {
     return this.bookingsRepository.find({
-      where: { tradesmanId },
+      where: { tradesman_id: tradesmanId },
       relations: ['client'],
       order: {
-        scheduledDate: 'ASC',
-        createdAt: 'DESC',
+        scheduled_date: 'ASC',
+        created_at: 'DESC',
       },
     });
   }
 
   async findAllForClient(clientId: string): Promise<Booking[]> {
     return this.bookingsRepository.find({
-      where: { clientId },
+      where: { client_id: clientId },
       relations: ['client', 'tradesman'],
     });
   }
@@ -83,7 +83,7 @@ export class BookingsService {
     quotedPrice?: number,
   ): Promise<Booking> {
     const booking = await this.bookingsRepository.findOne({
-      where: { id, tradesmanId },
+      where: { id, tradesman_id: tradesmanId },
       relations: ['client', 'tradesman'],
     });
 
@@ -105,7 +105,7 @@ export class BookingsService {
     scheduledDate: Date,
   ): Promise<Booking> {
     const booking = await this.bookingsRepository.findOne({
-      where: { id, tradesmanId },
+      where: { id, tradesman_id: tradesmanId },
       relations: ['client', 'tradesman'],
     });
 

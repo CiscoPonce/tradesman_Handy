@@ -15,7 +15,7 @@ export enum BookingSource {
   HOUSING_ASSOCIATION = 'housing_association'
 }
 
-@Entity('bookings')
+@Entity({ name: 'bookings' })
 export class Booking {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -56,21 +56,22 @@ export class Booking {
   })
   scheduledDate: Date;
 
-  @Column({ name: 'client_id' })
+  @Column({ name: 'client_id', type: 'uuid' })
   clientId: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'client_id' })
+  @JoinColumn({ name: 'client_id', referencedColumnName: 'id' })
   client: User;
 
   @Column({
     name: 'tradesman_id',
+    type: 'uuid',
     nullable: true
   })
   tradesmanId: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'tradesman_id' })
+  @JoinColumn({ name: 'tradesman_id', referencedColumnName: 'id' })
   tradesman: User;
 
   @Column()
