@@ -15,7 +15,7 @@ export enum BookingSource {
   HOUSING_ASSOCIATION = 'housing_association'
 }
 
-@Entity({ name: 'bookings' })
+@Entity('bookings')
 export class Booking {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -45,33 +45,33 @@ export class Booking {
     precision: 10,
     scale: 2,
     nullable: true,
-    name: 'quoted_price'
+    name: 'quotedPrice'
   })
   quotedPrice: number;
 
   @Column({
     type: 'timestamptz',
     nullable: true,
-    name: 'scheduled_date'
+    name: 'scheduledDate'
   })
   scheduledDate: Date;
 
-  @Column({ name: 'client_id', type: 'uuid' })
+  @Column({ name: 'clientId', type: 'uuid' })
   clientId: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'client_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'clientId', referencedColumnName: 'id' })
   client: User;
 
   @Column({
-    name: 'tradesman_id',
+    name: 'tradesmanId',
     type: 'uuid',
     nullable: true
   })
   tradesmanId: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'tradesman_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'tradesmanId', referencedColumnName: 'id' })
   tradesman: User;
 
   @Column()
@@ -79,26 +79,26 @@ export class Booking {
 
   @Column({
     nullable: true,
-    name: 'housing_association_ref'
+    name: 'housingAssociationRef'
   })
   housingAssociationRef: string;
 
   @Column({
     type: 'timestamptz',
     nullable: true,
-    name: 'preferred_date'
+    name: 'preferredDate'
   })
   preferredDate: Date;
 
   @CreateDateColumn({
     type: 'timestamptz',
-    name: 'created_at'
+    name: 'createdAt'
   })
   createdAt: Date;
 
   @UpdateDateColumn({
     type: 'timestamptz',
-    name: 'updated_at'
+    name: 'updatedAt'
   })
   updatedAt: Date;
 }
