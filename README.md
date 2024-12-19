@@ -2,6 +2,42 @@
 
 A comprehensive mobile application for connecting tradesmen with customers, featuring a modern Android app frontend and a robust NestJS backend.
 
+## Project Overview
+
+Tradesman Handy is a comprehensive mobile platform designed to streamline the connection between skilled tradespeople and clients. The project consists of two main components: a mobile app for tradesmen built with Android/Kotlin, and a robust backend service powered by NestJS.
+
+### Mobile App (Android/Kotlin)
+The Android application is built using modern Android development practices and Material 3 Design principles. It features:
+- Clean Architecture with MVVM pattern
+- Jetpack Compose for modern UI development
+- Kotlin Coroutines for asynchronous operations
+- Dagger Hilt for dependency injection
+- Room Database for local data persistence
+- Material 3 components for a polished, professional look
+
+Key features include:
+- Booking management system for tradesmen
+- Real-time job notifications
+- Profile management
+- Schedule organization
+- Client communication tools
+
+### Backend (NestJS/TypeScript)
+The backend service is built with NestJS, providing a scalable and maintainable API. It includes:
+- RESTful API endpoints for all app features
+- PostgreSQL database with TypeORM
+- JWT-based authentication
+- Role-based access control
+- Automated migrations for database schema
+- Swagger API documentation
+
+The backend handles:
+- User authentication and authorization
+- Booking management and scheduling
+- Client-tradesman matching
+- Notification dispatch
+- Data persistence and retrieval
+
 ## Project Structure
 
 ```
