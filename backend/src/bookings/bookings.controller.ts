@@ -108,4 +108,9 @@ export class BookingsController {
   async deleteAll(): Promise<void> {
     return this.bookingsService.deleteAll();
   }
+
+  @Post('reset-table')
+  async resetBookingsTable() {
+    return this.bookingsService.resetBookingsTable();
+  }
 }
