@@ -55,30 +55,42 @@ export const generatePendingBookings = (): CreateBookingDto[] => {
     clientId: CLIENT_ID,
     tradesmanId: TRADESMAN_ID,
     source: BookingSource.LOCAL,
-    preferredDate: generateRandomDate(new Date(), new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))
+    preferredDate: generateRandomDate(new Date(), new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
+    quotedPrice: null,
+    scheduledDate: null
   }));
 };
 
 export const generateAcceptedBookings = (): CreateBookingDto[] => {
-  return Array(5).fill(null).map(() => ({
-    title: jobTitles[Math.floor(Math.random() * jobTitles.length)],
-    description: jobDescriptions[Math.floor(Math.random() * jobDescriptions.length)],
-    location: locations[Math.floor(Math.random() * locations.length)],
-    clientId: CLIENT_ID,
-    tradesmanId: TRADESMAN_ID,
-    source: BookingSource.LOCAL,
-    preferredDate: generateRandomDate(new Date(), new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))
-  }));
+  return Array(5).fill(null).map(() => {
+    const preferredDate = generateRandomDate(new Date(), new Date(Date.now() + 30 * 24 * 60 * 60 * 1000));
+    return {
+      title: jobTitles[Math.floor(Math.random() * jobTitles.length)],
+      description: jobDescriptions[Math.floor(Math.random() * jobDescriptions.length)],
+      location: locations[Math.floor(Math.random() * locations.length)],
+      clientId: CLIENT_ID,
+      tradesmanId: TRADESMAN_ID,
+      source: BookingSource.LOCAL,
+      preferredDate,
+      quotedPrice: Math.floor(Math.random() * 500) + 100, // Random price between 100 and 600
+      scheduledDate: new Date(preferredDate.getTime() + Math.random() * 24 * 60 * 60 * 1000) // Schedule within 24 hours of preferred date
+    };
+  });
 };
 
 export const generateCompletedBookings = (): CreateBookingDto[] => {
-  return Array(5).fill(null).map(() => ({
-    title: jobTitles[Math.floor(Math.random() * jobTitles.length)],
-    description: jobDescriptions[Math.floor(Math.random() * jobDescriptions.length)],
-    location: locations[Math.floor(Math.random() * locations.length)],
-    clientId: CLIENT_ID,
-    tradesmanId: TRADESMAN_ID,
-    source: BookingSource.LOCAL,
-    preferredDate: generateRandomDate(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), new Date())
-  }));
+  return Array(5).fill(null).map(() => {
+    const preferredDate = generateRandomDate(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), new Date());
+    return {
+      title: jobTitles[Math.floor(Math.random() * jobTitles.length)],
+      description: jobDescriptions[Math.floor(Math.random() * jobDescriptions.length)],
+      location: locations[Math.floor(Math.random() * locations.length)],
+      clientId: CLIENT_ID,
+      tradesmanId: TRADESMAN_ID,
+      source: BookingSource.LOCAL,
+      preferredDate,
+      quotedPrice: Math.floor(Math.random() * 500) + 100, // Random price between 100 and 600
+      scheduledDate: new Date(preferredDate.getTime() + Math.random() * 24 * 60 * 60 * 1000) // Schedule within 24 hours of preferred date
+    };
+  });
 };
