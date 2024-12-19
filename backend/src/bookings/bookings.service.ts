@@ -13,6 +13,61 @@ export class BookingsService {
     private usersService: UsersService,
   ) {}
 
+  async resetBookingsTable(): Promise<void> {
+    try {
+      // Drop existing table and types
+      await this.bookingsRepository.query(`
+        DROP TABLE IF EXISTS bookings CASCADE;
+        DROP TYPE IF EXISTS BookingSource;
+        DROP TYPE IF EXISTS BookingStatus;
+      `);
+
+      // Run the migration manually
+      await this.bookingsRepository.query(`
+        CREATE TABLE IF NOT EXISTS bookings (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          title VARCHAR NOT NULL,
+          description TEXT NOT NULL,
+          source VARCHAR DEFAULT 'local',
+          status VARCHAR DEFAULT 'pending',
+          "quotedPrice" DECIMAL(10,2),
+          "scheduledDate" TIMESTAMPTZ,
+          "clientId" UUID NOT NULL,
+          "tradesmanId" UUID,
+          location VARCHAR NOT NULL,
+          "housingAssociationRef" VARCHAR,
+          "preferredDate" TIMESTAMPTZ,
+          "createdAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Create enum types
+        DO $$ 
+        BEGIN 
+          CREATE TYPE BookingSource AS ENUM ('local', 'housing_association');
+          CREATE TYPE BookingStatus AS ENUM ('pending', 'quoted', 'accepted', 'rejected', 'completed', 'cancelled');
+        EXCEPTION
+          WHEN duplicate_object THEN null;
+        END $$;
+
+        -- Update column types to use enums
+        DO $$
+        BEGIN
+          ALTER TABLE bookings 
+            ALTER COLUMN source TYPE BookingSource USING source::BookingSource,
+            ALTER COLUMN status TYPE BookingStatus USING status::BookingStatus;
+        EXCEPTION
+          WHEN others THEN null;
+        END $$;
+      `);
+
+      console.log('Successfully reset bookings table');
+    } catch (error) {
+      console.error('Error resetting bookings table:', error);
+      throw new InternalServerErrorException('Failed to reset bookings table');
+    }
+  }
+
   async create(createBookingDto: CreateBookingDto, clientId: string): Promise<Booking> {
     try {
       const tradesman = await this.usersService.findById(createBookingDto.tradesmanId);
