@@ -49,10 +49,25 @@ export class BookingsService {
         throw new InternalServerErrorException('Bookings table not found');
       }
 
-      // Then get all bookings
-      const bookings = await this.bookingsRepository.find({
-        relations: ['client', 'tradesman'],
-      });
+      // Then get all bookings with careful relation loading
+      const bookings = await this.bookingsRepository
+        .createQueryBuilder('booking')
+        .leftJoinAndSelect('booking.client', 'client')
+        .leftJoinAndSelect('booking.tradesman', 'tradesman')
+        .select([
+          'booking',
+          'client.id',
+          'client.email',
+          'client.firstName',
+          'client.lastName',
+          'client.phoneNumber',
+          'tradesman.id',
+          'tradesman.email',
+          'tradesman.firstName',
+          'tradesman.lastName',
+          'tradesman.phoneNumber',
+        ])
+        .getMany();
 
       return bookings;
     } catch (error) {
@@ -63,14 +78,23 @@ export class BookingsService {
 
   async findAllForTradesman(tradesmanId: string): Promise<Booking[]> {
     try {
-      return await this.bookingsRepository.find({
-        where: { tradesmanId },
-        relations: ['client'],
-        order: {
-          scheduledDate: 'ASC',
-          createdAt: 'DESC',
-        },
-      });
+      const bookings = await this.bookingsRepository
+        .createQueryBuilder('booking')
+        .leftJoinAndSelect('booking.client', 'client')
+        .where('booking.tradesmanId = :tradesmanId', { tradesmanId })
+        .select([
+          'booking',
+          'client.id',
+          'client.email',
+          'client.firstName',
+          'client.lastName',
+          'client.phoneNumber',
+        ])
+        .orderBy('booking.scheduledDate', 'ASC')
+        .addOrderBy('booking.createdAt', 'DESC')
+        .getMany();
+
+      return bookings;
     } catch (error) {
       console.error(`Error fetching bookings for tradesman ${tradesmanId}:`, error);
       throw new InternalServerErrorException('Failed to fetch tradesman bookings');
@@ -79,10 +103,27 @@ export class BookingsService {
 
   async findAllForClient(clientId: string): Promise<Booking[]> {
     try {
-      return await this.bookingsRepository.find({
-        where: { clientId },
-        relations: ['client', 'tradesman'],
-      });
+      const bookings = await this.bookingsRepository
+        .createQueryBuilder('booking')
+        .leftJoinAndSelect('booking.client', 'client')
+        .leftJoinAndSelect('booking.tradesman', 'tradesman')
+        .where('booking.clientId = :clientId', { clientId })
+        .select([
+          'booking',
+          'client.id',
+          'client.email',
+          'client.firstName',
+          'client.lastName',
+          'client.phoneNumber',
+          'tradesman.id',
+          'tradesman.email',
+          'tradesman.firstName',
+          'tradesman.lastName',
+          'tradesman.phoneNumber',
+        ])
+        .getMany();
+
+      return bookings;
     } catch (error) {
       console.error(`Error fetching bookings for client ${clientId}:`, error);
       throw new InternalServerErrorException('Failed to fetch client bookings');
@@ -96,10 +137,26 @@ export class BookingsService {
     quotedPrice?: number,
   ): Promise<Booking> {
     try {
-      const booking = await this.bookingsRepository.findOne({
-        where: { id, tradesmanId },
-        relations: ['client', 'tradesman'],
-      });
+      const booking = await this.bookingsRepository
+        .createQueryBuilder('booking')
+        .leftJoinAndSelect('booking.client', 'client')
+        .leftJoinAndSelect('booking.tradesman', 'tradesman')
+        .where('booking.id = :id', { id })
+        .andWhere('booking.tradesmanId = :tradesmanId', { tradesmanId })
+        .select([
+          'booking',
+          'client.id',
+          'client.email',
+          'client.firstName',
+          'client.lastName',
+          'client.phoneNumber',
+          'tradesman.id',
+          'tradesman.email',
+          'tradesman.firstName',
+          'tradesman.lastName',
+          'tradesman.phoneNumber',
+        ])
+        .getOne();
 
       if (!booking) {
         throw new NotFoundException('Booking not found');
@@ -124,10 +181,26 @@ export class BookingsService {
     scheduledDate: Date,
   ): Promise<Booking> {
     try {
-      const booking = await this.bookingsRepository.findOne({
-        where: { id, tradesmanId },
-        relations: ['client', 'tradesman'],
-      });
+      const booking = await this.bookingsRepository
+        .createQueryBuilder('booking')
+        .leftJoinAndSelect('booking.client', 'client')
+        .leftJoinAndSelect('booking.tradesman', 'tradesman')
+        .where('booking.id = :id', { id })
+        .andWhere('booking.tradesmanId = :tradesmanId', { tradesmanId })
+        .select([
+          'booking',
+          'client.id',
+          'client.email',
+          'client.firstName',
+          'client.lastName',
+          'client.phoneNumber',
+          'tradesman.id',
+          'tradesman.email',
+          'tradesman.firstName',
+          'tradesman.lastName',
+          'tradesman.phoneNumber',
+        ])
+        .getOne();
 
       if (!booking) {
         throw new NotFoundException('Booking not found');
@@ -149,10 +222,26 @@ export class BookingsService {
     scheduledDate: Date,
   ): Promise<Booking> {
     try {
-      const booking = await this.bookingsRepository.findOne({
-        where: { id, tradesmanId },
-        relations: ['client', 'tradesman'],
-      });
+      const booking = await this.bookingsRepository
+        .createQueryBuilder('booking')
+        .leftJoinAndSelect('booking.client', 'client')
+        .leftJoinAndSelect('booking.tradesman', 'tradesman')
+        .where('booking.id = :id', { id })
+        .andWhere('booking.tradesmanId = :tradesmanId', { tradesmanId })
+        .select([
+          'booking',
+          'client.id',
+          'client.email',
+          'client.firstName',
+          'client.lastName',
+          'client.phoneNumber',
+          'tradesman.id',
+          'tradesman.email',
+          'tradesman.firstName',
+          'tradesman.lastName',
+          'tradesman.phoneNumber',
+        ])
+        .getOne();
 
       if (!booking) {
         throw new NotFoundException('Booking not found');
@@ -172,10 +261,25 @@ export class BookingsService {
 
   async findOne(id: string): Promise<Booking> {
     try {
-      const booking = await this.bookingsRepository.findOne({
-        where: { id },
-        relations: ['client', 'tradesman'],
-      });
+      const booking = await this.bookingsRepository
+        .createQueryBuilder('booking')
+        .leftJoinAndSelect('booking.client', 'client')
+        .leftJoinAndSelect('booking.tradesman', 'tradesman')
+        .where('booking.id = :id', { id })
+        .select([
+          'booking',
+          'client.id',
+          'client.email',
+          'client.firstName',
+          'client.lastName',
+          'client.phoneNumber',
+          'tradesman.id',
+          'tradesman.email',
+          'tradesman.firstName',
+          'tradesman.lastName',
+          'tradesman.phoneNumber',
+        ])
+        .getOne();
 
       if (!booking) {
         throw new NotFoundException('Booking not found');
