@@ -1,6 +1,7 @@
 package com.tradesmanhandy.app.domain.repository
 
 import com.tradesmanhandy.app.data.model.Booking
+import com.tradesmanhandy.app.data.model.BookingStatus
 import kotlinx.coroutines.flow.Flow
 
 interface IBookingRepository {
@@ -24,4 +25,6 @@ interface IBookingRepository {
     suspend fun rejectBooking(bookingId: String): Booking
 
     suspend fun scheduleBooking(bookingId: String, scheduledDate: String): Booking
+
+    suspend fun updateBookingStatus(bookingId: String, status: BookingStatus): Booking
 }

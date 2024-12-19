@@ -42,4 +42,9 @@ export class CreateBookingDto {
   @IsOptional()
   @IsString()
   housingAssociationRef?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsDateString()
+  preferredDate?: string;
 }

@@ -1,6 +1,8 @@
 package com.tradesmanhandy.app.presentation.home
 
-import android.util.Log
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tradesmanhandy.app.data.model.Booking
@@ -12,9 +14,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-
-private const val TAG = "HomeViewModel"
 
 data class BookingStats(
     val pending: Int = 0,
@@ -24,7 +27,16 @@ data class BookingStats(
 
 sealed class HomeUiState {
     object Loading : HomeUiState()
-    data class Success(val stats: BookingStats) : HomeUiState()
+    data class Success(
+        val userName: String = "",
+        val profileImageUrl: String? = null,
+        val stats: BookingStats = BookingStats(),
+        val bookingDates: Set<LocalDate> = emptySet(),
+        val currentMonth: YearMonth? = null,
+        val startMonth: YearMonth? = null,
+        val endMonth: YearMonth? = null,
+        val daysOfWeek: List<String> = emptyList()
+    ) : HomeUiState()
     data class Error(val message: String) : HomeUiState()
 }
 
@@ -32,45 +44,87 @@ sealed class HomeUiState {
 class HomeViewModel @Inject constructor(
     private val repository: BookingRepository
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
-        loadBookings()
+        loadData()
+        initializeCalendar()
     }
 
-    private fun loadBookings() {
+    public fun loadData() {
         viewModelScope.launch {
             try {
-                val response = repository.getTradesmanBookings("2b6fe808-b73b-4d16-915b-298b4d076c47").first()
-                val stats = calculateStats(response)
-                _uiState.value = HomeUiState.Success(stats)
+                val bookings = repository.getTradesmanBookings("2b6fe808-b73b-4d16-915b-298b4d076c47").first()
+                
+                // Calculate booking dates
+                val bookingDates = bookings.mapNotNull { booking ->
+                    booking.scheduledDate?.let { dateStr ->
+                        try {
+                            // Assuming the date string is in ISO format (e.g., "2024-12-08")
+                            LocalDate.parse(dateStr.split("T")[0])
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                }.toSet()
+
+                // Calculate stats
+                val stats = BookingStats(
+                    pending = bookings.count { it.status == BookingStatus.PENDING },
+                    confirmed = bookings.count { it.status == BookingStatus.ACCEPTED || it.status == BookingStatus.CONFIRMED },
+                    completed = bookings.count { it.status == BookingStatus.COMPLETED }
+                )
+
+                _uiState.value = when (val currentState = _uiState.value) {
+                    is HomeUiState.Success -> currentState.copy(
+                        stats = stats,
+                        bookingDates = bookingDates
+                    )
+                    else -> HomeUiState.Success(
+                        userName = "John Smith", // TODO: Get from user repository
+                        profileImageUrl = null,
+                        stats = stats,
+                        bookingDates = bookingDates
+                    )
+                }
             } catch (e: Exception) {
-                Log.e(TAG, "Error loading bookings", e)
-                _uiState.value = HomeUiState.Error(e.message ?: "Unknown error occurred")
+                _uiState.value = HomeUiState.Error("Failed to load bookings: ${e.message}")
             }
         }
     }
 
-    private fun calculateStats(bookings: List<Booking>): BookingStats {
-        var pending = 0
-        var confirmed = 0
-        var completed = 0
-
-        bookings.forEach { booking ->
-            when (booking.status) {
-                BookingStatus.PENDING -> pending++
-                BookingStatus.ACCEPTED -> confirmed++
-                BookingStatus.COMPLETED -> completed++
-                else -> {} // Ignore other statuses
-            }
-        }
-
-        return BookingStats(
-            pending = pending,
-            confirmed = confirmed,
-            completed = completed
+    private fun initializeCalendar() {
+        val today = LocalDate.of(2024, 12, 9) // Using the provided current time
+        val currentMonth = YearMonth.from(today)
+        
+        _uiState.value = (_uiState.value as? HomeUiState.Success)?.copy(
+            currentMonth = currentMonth,
+            startMonth = YearMonth.from(today.minusWeeks(1)),
+            endMonth = YearMonth.from(today.plusWeeks(2)),
+            daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+        ) ?: HomeUiState.Success(
+            userName = "John Smith", 
+            profileImageUrl = null,
+            stats = BookingStats(),
+            bookingDates = emptySet(),
+            currentMonth = currentMonth,
+            startMonth = YearMonth.from(today.minusWeeks(1)),
+            endMonth = YearMonth.from(today.plusWeeks(2)),
+            daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
         )
+    }
+
+    fun onNotificationClick() {
+        // TODO: Implement notification handling
+    }
+
+    fun onMessageClick() {
+        // TODO: Implement message handling
+    }
+
+    fun onDateSelected(date: LocalDate) {
+        // TODO: Implement date selection handling
+        // This could navigate to a day detail screen or show a bottom sheet with bookings for that day
     }
 }

@@ -15,15 +15,7 @@ import { HealthModule } from './health/health.module';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        url: configService.get('DATABASE_URL'),
-        autoLoadEntities: true,
-        synchronize: configService.get('NODE_ENV') !== 'production',
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      }),
+      useFactory: getDatabaseConfig,
       inject: [ConfigService],
     }),
     UsersModule,

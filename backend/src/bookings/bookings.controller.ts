@@ -1,8 +1,11 @@
-import { Controller, Get, Post, Body, Param, Put, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Headers } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { Booking, BookingStatus } from './entities/booking.entity';
+import { NotFoundException, ForbiddenException } from '@nestjs/common';
+import { UpdateQuoteDto } from './dto/update-quote.dto';
+import { ClientAuthGuard } from '../auth/client-auth.guard';
 
 @ApiTags('bookings')
 @Controller('bookings')
@@ -18,6 +21,13 @@ export class BookingsController {
     return this.bookingsService.create(createBookingDto, createBookingDto.clientId);
   }
 
+  @Get()
+  @ApiOperation({ summary: 'Get all bookings' })
+  @ApiResponse({ status: 200, description: 'Return all bookings', type: [Booking] })
+  async findAll(): Promise<Booking[]> {
+    return this.bookingsService.findAll();
+  }
+
   @Get('tradesman/:tradesmanId')
   @ApiOperation({ summary: 'Get all bookings for a tradesman' })
   @ApiResponse({ status: 200, description: 'Returns all bookings', type: [Booking] })
@@ -25,16 +35,30 @@ export class BookingsController {
     return this.bookingsService.findAllForTradesman(tradesmanId);
   }
 
+  @Get('client/:clientId')
+  @ApiOperation({ summary: 'Get all bookings for a client' })
+  @ApiResponse({ status: 200, description: 'Return all bookings for a client', type: [Booking] })
+  async findAllForClient(@Param('clientId') clientId: string): Promise<Booking[]> {
+    return this.bookingsService.findAllForClient(clientId);
+  }
+
   @Put(':id/quote')
+  @UseGuards(ClientAuthGuard)
   @ApiOperation({ summary: 'Submit a quote for a booking' })
   @ApiResponse({ status: 200, description: 'Quote submitted successfully', type: Booking })
-  async submitQuote(
+  async updateQuote(
     @Param('id') id: string,
-    // TODO: Get from JWT token
-    tradesmanId: string,
-    @Body('price') price: number,
+    @Body() updateQuoteDto: UpdateQuoteDto,
   ): Promise<Booking> {
-    return this.bookingsService.updateStatus(id, tradesmanId, BookingStatus.QUOTED, price);
+    const updatedBooking = await this.bookingsService.updateQuote(
+      id,
+      updateQuoteDto.tradesmanId,
+      updateQuoteDto.quotedPrice,
+      new Date(updateQuoteDto.scheduledDate),
+    );
+    
+    // Fetch the fresh booking to ensure we have the latest data
+    return this.bookingsService.findOne(id);
   }
 
   @Put(':id/accept')
@@ -76,5 +100,12 @@ export class BookingsController {
   @ApiResponse({ status: 200, description: 'Returns the booking', type: Booking })
   async findOne(@Param('id') id: string): Promise<Booking> {
     return this.bookingsService.findOne(id);
+  }
+
+  @Delete('all')
+  @ApiOperation({ summary: 'Delete all bookings' })
+  @ApiResponse({ status: 200, description: 'All bookings deleted successfully' })
+  async deleteAll(): Promise<void> {
+    return this.bookingsService.deleteAll();
   }
 }

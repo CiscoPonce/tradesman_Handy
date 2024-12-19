@@ -38,14 +38,12 @@ enum class BookingSource {
 enum class BookingStatus {
     @Json(name = "pending")
     PENDING,
-    @Json(name = "quoted")
-    QUOTED,
     @Json(name = "accepted")
     ACCEPTED,
     @Json(name = "rejected")
     REJECTED,
-    @Json(name = "in_progress")
-    IN_PROGRESS,
+    @Json(name = "confirmed")
+    CONFIRMED,
     @Json(name = "completed")
     COMPLETED,
     @Json(name = "cancelled")

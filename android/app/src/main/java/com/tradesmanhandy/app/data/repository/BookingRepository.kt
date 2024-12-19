@@ -3,7 +3,9 @@ package com.tradesmanhandy.app.data.repository
 import com.tradesmanhandy.app.data.api.TradesmanHandyApi
 import com.tradesmanhandy.app.data.api.models.CreateBookingRequest
 import com.tradesmanhandy.app.data.api.models.SubmitQuoteRequest
+import com.tradesmanhandy.app.data.api.models.UpdateBookingStatusRequest
 import com.tradesmanhandy.app.data.model.Booking
+import com.tradesmanhandy.app.data.model.BookingStatus
 import com.tradesmanhandy.app.domain.repository.IBookingRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -80,6 +82,22 @@ class BookingRepository @Inject constructor(
     }
 
     override suspend fun scheduleBooking(bookingId: String, scheduledDate: String): Booking {
-        throw NotImplementedError("Schedule booking is not implemented in the API")
+        return try {
+            val request = UpdateBookingStatusRequest(
+                status = BookingStatus.ACCEPTED.name.lowercase(),
+                scheduledDate = scheduledDate
+            )
+            api.scheduleBooking(bookingId, request)
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override suspend fun updateBookingStatus(bookingId: String, status: BookingStatus): Booking {
+        return try {
+            api.updateBookingStatus(bookingId, UpdateBookingStatusRequest(status = status.name.lowercase()))
+        } catch (e: Exception) {
+            throw e
+        }
     }
 }

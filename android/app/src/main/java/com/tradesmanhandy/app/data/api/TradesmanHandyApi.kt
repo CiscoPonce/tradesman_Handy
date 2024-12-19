@@ -5,6 +5,7 @@ import com.tradesmanhandy.app.data.model.User
 import com.tradesmanhandy.app.data.api.models.CreateUserRequest
 import com.tradesmanhandy.app.data.api.models.CreateBookingRequest
 import com.tradesmanhandy.app.data.api.models.SubmitQuoteRequest
+import com.tradesmanhandy.app.data.api.models.UpdateBookingStatusRequest
 import retrofit2.http.*
 
 interface TradesmanHandyApi {
@@ -34,4 +35,16 @@ interface TradesmanHandyApi {
 
     @PUT("/api/v1/bookings/{id}/complete/")
     suspend fun completeBooking(@Path("id") bookingId: String): Booking
+
+    @PUT("/api/v1/bookings/{id}/schedule/")
+    suspend fun scheduleBooking(
+        @Path("id") bookingId: String,
+        @Body request: UpdateBookingStatusRequest
+    ): Booking
+
+    @PUT("bookings/{id}/status")
+    suspend fun updateBookingStatus(
+        @Path("id") bookingId: String,
+        @Body request: UpdateBookingStatusRequest
+    ): Booking
 }

@@ -6,7 +6,6 @@ export enum BookingStatus {
   QUOTED = 'quoted',
   ACCEPTED = 'accepted',
   REJECTED = 'rejected',
-  IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   CANCELLED = 'cancelled'
 }
@@ -24,7 +23,7 @@ export class Booking {
   @Column()
   title: string;
 
-  @Column('text')
+  @Column()
   description: string;
 
   @Column({
@@ -41,35 +40,64 @@ export class Booking {
   })
   status: BookingStatus;
 
-  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    nullable: true,
+    name: 'quoted_price'
+  })
   quotedPrice: number;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({
+    type: 'timestamptz',
+    nullable: true,
+    name: 'scheduled_date'
+  })
   scheduledDate: Date;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'clientId' })
-  client: User;
-
-  @Column()
+  @Column({ name: 'client_id' })
   clientId: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'tradesmanId' })
+  @JoinColumn({ name: 'client_id' })
+  client: User;
+
+  @Column({
+    name: 'tradesman_id',
+    nullable: true
+  })
+  tradesmanId: string;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'tradesman_id' })
   tradesman: User;
 
   @Column()
-  tradesmanId: string;
-
-  @Column({ nullable: true })
   location: string;
 
-  @Column({ nullable: true })
+  @Column({
+    nullable: true,
+    name: 'housing_association_ref'
+  })
   housingAssociationRef: string;
 
-  @CreateDateColumn()
+  @Column({
+    type: 'timestamptz',
+    nullable: true,
+    name: 'preferred_date'
+  })
+  preferredDate: Date;
+
+  @CreateDateColumn({
+    type: 'timestamptz',
+    name: 'created_at'
+  })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({
+    type: 'timestamptz',
+    name: 'updated_at'
+  })
   updatedAt: Date;
 }
